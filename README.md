@@ -31,7 +31,7 @@ Request:
 {
   "customer_id": 88,
   "payment_method_id": 99,
-  amount_cents: 6510,
+  "amount_cents": 6510,
   "metadata": {
     "order_id": 44,
   }
