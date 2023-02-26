@@ -29,11 +29,11 @@ Request:
 
 ```json
 {
-  customer_id: 88,
-  payment_method_id: 99,
+  "customer_id": 88,
+  "payment_method_id": 99,
   amount_cents: 6510,
-  metadata: {
-    order_id: 44,
+  "metadata": {
+    "order_id": 44,
   }
 }
 ```
@@ -50,8 +50,8 @@ HTTP Status: 201
 
 ```json
 {
-  status: "success",
-  charge_id: "A charge id"
+  "status": "success",
+  "charge_id": "A charge id"
 }
 ```
 
@@ -61,8 +61,8 @@ HTTP Status: 200
 
 ```json
 {
-  status: "declined",
-  explanation: "some explanation"
+  "status": "declined",
+  "explanation": "some explanation"
 }
 ```
 
@@ -78,10 +78,10 @@ Request:
 
 ```json
 {
-  customer_id: 45,
-  address: "123 any st",
-  metadata: {
-    order_id: 44,
+  "customer_id": 45,
+  "address": "123 any st",
+  "metadata": {
+    "order_id": 44,
   }
 }
 ```
@@ -94,8 +94,8 @@ HTTP Status: 202
 
 ```json
 {
-  status: "accepted",
-  request_id: "ID of the fulfillment request"
+  "status": "accepted",
+  "request_id": "ID of the fulfillment request"
 }
 ```
 
@@ -105,8 +105,8 @@ HTTP Status: 422
 
 ```json
 {
-  status: "rejected",
-  error: "some explanation"
+  "status": "rejected",
+  "error": "some explanation"
 }
 ```
 
@@ -122,11 +122,11 @@ Request:
 
 ```json
 {
-  to: "pat@example.com",
-  template_id: "12345",
-  template_data: {
-    name: "Pat",
-    order_id: 44,
+  "to": "pat@example.com",
+  "template_id": "12345",
+  "template_data": {
+    "name": "Pat",
+    "order_id": 44,
   }
 }
 ```
@@ -140,8 +140,8 @@ HTTP Status: 202
 
 ```json
 {
-  status: "queued",
-  email_id: "ID of the fulfillment request"
+  "status": "queued",
+  "email_id": "ID of the fulfillment request"
 }
 ```
 
@@ -151,7 +151,7 @@ HTTP Status: 422
 
 ```json
 {
-  status: "not-queued",
-  errorMessage: "Some error message"
+  "status": "not-queued",
+  "errorMessage": "Some error message"
 }
 ```
