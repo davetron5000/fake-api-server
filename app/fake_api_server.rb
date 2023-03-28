@@ -207,6 +207,10 @@ ERROR_CATCHER_HEAD = %{
 get "/" do
   redirect "/error-catcher/notifications"
 end
+delete "/error-catcher/notifications" do
+  $notifications = []
+  200
+end
 get "/error-catcher/notifications" do
   notifications_html = if $notifications.empty?
                          "<tr><td colspan='3'>NONE YET</td></tr>"

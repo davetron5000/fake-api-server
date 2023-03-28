@@ -66,5 +66,42 @@ class ErrorCatcherTest < Minitest::Test
     assert_match /StandardError/,body
 
   end
+  def test_delete_notifications
+    request1 = {
+      exception_class: "StandardError",
+      exception_message: "something broke",
+      backtrace: [
+        "foo:12",
+        "bar:13"
+      ],
+      metadata: {
+        some_data: true
+      }
+    }.to_json
+    put "/error-catcher/notification", request1, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 202,last_response.status
+
+    request2 = {
+      exception_class: "NameError",
+      exception_message: "something broke",
+      backtrace: [
+        "foo:12",
+        "bar:13"
+      ],
+      metadata: {
+        some_data: true
+      }
+    }.to_json
+    put "/error-catcher/notification", request2, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 202,last_response.status
+
+    delete "/error-catcher/notifications", nil, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 200,last_response.status
+
+    get "/error-catcher/notifications", nil, { "HTTP_ACCEPT" => "text/html" }
+    body = last_response.body.to_s
+    assert_equal 200,last_response.status
+    assert_match /NONE YET/,body
+  end
 
 end
