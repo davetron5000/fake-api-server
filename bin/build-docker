@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+. ${SCRIPT_DIR}/version
+
+if [ -e /.dockerenv ]; then
+  echo "[ $0 ]: You should not run this inside a Docker container"
+  exit 1
+fi
+docker build -t davetron5000/fake-api-server:${VERSION} ./

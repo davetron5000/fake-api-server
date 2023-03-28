@@ -1,4 +1,5 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 PORT="${PORT:-3000}"
+export PORT
 bundle exec ruby app/fake_api_server.rb

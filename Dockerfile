@@ -1,3 +1,4 @@
+# This is for actual use. See Dockerfile.dx for local dev
 FROM ruby:3.2
 
 ENV BINDING="0.0.0.0"
