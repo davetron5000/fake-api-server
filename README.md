@@ -155,3 +155,10 @@ HTTP Status: 422
   "errorMessage": "Some error message"
 }
 ```
+
+## Running
+
+* `bin/setup` will set everything up
+* `bin/test` will run tests
+* `bin/ci` will run tests + security checks
+* `bin/run` will run locally
