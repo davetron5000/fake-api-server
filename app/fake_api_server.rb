@@ -67,15 +67,16 @@ post "/payments/charge" do
     [ 200, [], [ response.to_json ] ]
   else
     last_charge = $charges[-1]
-    if last_charge && last_charge["customer_id"]  == @request_payload["customer_id"] &&
-                      last_charge["amount_cents"] == @request_payload["amount_cents"]
+    if last_charge && last_charge["customer_id"]  == @request_payload["customer_id"]  &&
+                      last_charge["amount_cents"] == @request_payload["amount_cents"] &&
+                      (Time.now.to_i - (last_charge["time"].to_i) < 5)
       response = {
         status: "declined",
         explanation: "Possible fraud",
       }
       [ 200, [], [ response.to_json ] ]
     else
-      $charges << @request_payload
+      $charges << @request_payload.merge({ "time" => Time.now })
       response = {
         status: "success",
         charge_id: "ch_#{SecureRandom.uuid}",

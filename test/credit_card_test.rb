@@ -28,9 +28,9 @@ class CreditCardTest < Minitest::Test
     refute_nil response["charge_id"]
   end
 
-  def test_de_dupe
+  def test_fraud_if_immediate_dupe
     request = {
-      customer_id: 45,
+      customer_id: 47,
       payment_method_id: 99,
       amount_cents: 65_10,
       metadata: {
@@ -60,6 +60,24 @@ class CreditCardTest < Minitest::Test
 
     post "/payments/charge", request, { "HTTP_ACCEPT" => "application/json" }
     assert_equal 201,last_response.status
+  end
+  if ENV["INCLUDE_SLOW"] == "true"
+    def test_not_fraud_if_immediate_dupe_but_delay
+      request = {
+        customer_id: 45,
+        payment_method_id: 99,
+        amount_cents: 65_10,
+        metadata: {
+          order_id: 44,
+        }
+      }.to_json
+      post "/payments/charge", request, { "HTTP_ACCEPT" => "application/json" }
+      assert_equal 201,last_response.status
+      sleep 5
+
+      post "/payments/charge", request, { "HTTP_ACCEPT" => "application/json" }
+      assert_equal 201,last_response.status
+    end
   end
 
   def test_decline
