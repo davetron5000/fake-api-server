@@ -224,3 +224,10 @@ GET /error-catcher/notifications
 1. Run tests and security checks with `bin/ci`
 1. Run server locally with `bin/run`
 
+## Integration with Sidekiq Book Stuff
+
+1. Be sure that `Dockerfile` and `Dockerfile.dx` are consistent
+1. Edit `bin/version`
+1. `bin/docker-build`
+1. `bin/push-dockerhub`
+1. Edit the sidekiq book's `automation/docker-compose.yml` to use the new version
