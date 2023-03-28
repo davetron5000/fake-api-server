@@ -156,9 +156,71 @@ HTTP Status: 422
 }
 ```
 
-## Running
+### Perform Error-Catching (e.g. like Bugsnag)
 
-* `bin/setup` will set everything up
-* `bin/test` will run tests
-* `bin/ci` will run tests + security checks
-* `bin/run` will run locally
+This simulates receiving an uncaught error
+
+```
+PUT /error-catcher/notification
+```
+
+Request:
+
+```json
+{
+  "exception_class": "StandardError",
+  "exception_message": "Something went wrong!"
+}
+```
+
+Both keys are required
+
+#### Success Response
+
+HTTP Status: 202
+
+```json
+{
+  "notification_id": "ID of the notification"
+}
+```
+
+#### Decline Response
+
+HTTP Status: 422
+
+```json
+{
+  "error": "some explanation"
+}
+```
+
+### View Caught Errors
+
+These are stored in memory:
+
+```
+GET /error-catcher/notifications
+```
+
+`GET /` will redirect to this
+
+## Setup and Running Locally
+
+### One Time Setup
+
+1. Clone this repo
+1. Install Docker Desktop
+1. `dx/setup` then answer whatever questions it asks
+1. `dx/start`
+
+### Running & Developing
+
+1. Do the setup above, including `dx/start`
+1. Set up the app's dependencies
+   1. In a new terminal window `dx/exec bash` - You are logged into the running container.
+   1. `bin/setup`
+1. Run tests with `bin/test`
+1. Run tests and security checks with `bin/ci`
+1. Run server locally with `bin/run`
+

@@ -46,6 +46,20 @@ class CreditCardTest < Minitest::Test
     assert_equal "declined", response["status"]
     assert_equal "Possible fraud", response["explanation"]
     assert_nil response["charge_id"]
+
+    request2 = {
+      customer_id: 46,
+      payment_method_id: 99,
+      amount_cents: 65_10,
+      metadata: {
+        order_id: 44,
+      }
+    }.to_json
+    post "/payments/charge", request2, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 201,last_response.status
+
+    post "/payments/charge", request, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 201,last_response.status
   end
 
   def test_decline

@@ -66,10 +66,9 @@ post "/payments/charge" do
     }
     [ 200, [], [ response.to_json ] ]
   else
-    if $charges.any? { |charge|
-      charge["customer_id"] == @request_payload["customer_id"] &&
-        charge["amount_cents"] == @request_payload["amount_cents"]
-    }
+    last_charge = $charges[-1]
+    if last_charge && last_charge["customer_id"]  == @request_payload["customer_id"] &&
+                      last_charge["amount_cents"] == @request_payload["amount_cents"]
       response = {
         status: "declined",
         explanation: "Possible fraud",
