@@ -5,6 +5,8 @@ set :bind, ENV.fetch("BINDING")
 set :port, ENV.fetch("PORT")
 
 $notifications = []
+$emails = []
+$fulfillment_requests = []
 
 before do
   accept = request.env["HTTP_ACCEPT"].to_s.split(/,/).map(&:strip).map(&:downcase)
@@ -87,27 +89,45 @@ post "/payments/charge" do
 end
 
 get "/fulfillment/status" do
-  200
+  [ 200, [], [ { num_requests: $fulfillment_requests.size }.to_json ] ]
 end
 
 put "/fulfillment/request" do
-  if @request_payload["address"].to_s.strip == ""
-    response = {
-      status: "rejected",
-      error: "Missing address",
-    }
-    [ 422, [], [ response.to_json ] ]
+  idempotency_key = @request_payload.dig("metadata","idempotency_key")
+  previous_request = if idempotency_key.nil?
+                       nil
+                     else
+                       $fulfillment_requests.detect { |request| request.dig("metadata","idempotency_key") == idempotency_key }
+                     end
+  if !previous_request.nil?
+    [ 202, [], [ previous_request["response"].to_json ] ]
   else
-    response = {
-      status: "accepted",
-      request_id: SecureRandom.uuid,
-    }
-    [ 202, [], [ response.to_json ] ]
+    if @request_payload["address"].to_s.strip == ""
+      response = {
+        status: "rejected",
+        error: "Missing address",
+      }
+      [ 422, [], [ response.to_json ] ]
+    else
+      response = {
+        status: "accepted",
+        request_id: SecureRandom.uuid,
+      }
+      $fulfillment_requests << @request_payload.merge({ "response" => { "status" => "accepted", "request_id" => response[:request_id] }})
+      [ 202, [], [ response.to_json ] ]
+    end
   end
 end
 
 get "/email/status" do
   200
+end
+
+get "/emails" do
+  matching_emails = $emails.select { |email|
+    email["to"] == params["email"] && email["template_id"] == params["template_id"]
+  }
+  [ 200, [], [ matching_emails.to_json ] ]
 end
 
 post "/email/send" do
@@ -128,6 +148,7 @@ post "/email/send" do
       status: "queued",
       email_id: SecureRandom.uuid,
     }
+    $emails << @request_payload.merge({ "email_id" => response[:email_id] })
     [ 202, [], [ response.to_json ] ]
   end
 end

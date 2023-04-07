@@ -60,4 +60,51 @@ class EmailTest < Minitest::Test
     assert_nil response["email_id"]
   end
 
+  def test_search_emails_none
+    get "/emails", { email: "cameron@example.com", template_id: "42" }, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 200,last_response.status
+    response = JSON.parse(last_response.body)
+    assert_equal [], response
+  end
+  def test_search_emails_some
+    request = {
+      to: "quinn@example.com",
+      template_id: "12345",
+      template_data: {
+        name: "Quinn",
+        order_id: 44,
+      }
+    }.to_json
+    post "/email/send", request, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 202,last_response.status
+    request = {
+      to: "quinn@example.com",
+      template_id: "4567",
+      template_data: {
+        name: "Quinn",
+        order_id: 44,
+      }
+    }.to_json
+    post "/email/send", request, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 202,last_response.status
+    request = {
+      to: "chris@example.com",
+      template_id: "12345",
+      template_data: {
+        name: "Chris",
+        order_id: 43,
+      }
+    }.to_json
+    post "/email/send", request, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 202,last_response.status
+
+    get "/emails", { email: "quinn@example.com", template_id: "12345" }, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 200,last_response.status
+    response = JSON.parse(last_response.body)
+    assert_equal 1, response.size
+    email = response[0]
+    assert_equal 44, email["template_data"]["order_id"]
+    refute_nil email["email_id"]
+  end
+
 end
