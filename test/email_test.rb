@@ -61,7 +61,7 @@ class EmailTest < Minitest::Test
   end
 
   def test_search_emails_none
-    get "/emails", { email: "cameron@example.com", template_id: "42" }, { "HTTP_ACCEPT" => "application/json" }
+    get "/email/emails", { email: "cameron@example.com", template_id: "42" }, { "HTTP_ACCEPT" => "application/json" }
     assert_equal 200,last_response.status
     response = JSON.parse(last_response.body)
     assert_equal [], response
@@ -98,7 +98,7 @@ class EmailTest < Minitest::Test
     post "/email/send", request, { "HTTP_ACCEPT" => "application/json" }
     assert_equal 202,last_response.status
 
-    get "/emails", { email: "quinn@example.com", template_id: "12345" }, { "HTTP_ACCEPT" => "application/json" }
+    get "/email/emails", { email: "quinn@example.com", template_id: "12345" }, { "HTTP_ACCEPT" => "application/json" }
     assert_equal 200,last_response.status
     response = JSON.parse(last_response.body)
     assert_equal 1, response.size

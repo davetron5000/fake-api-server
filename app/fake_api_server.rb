@@ -123,7 +123,7 @@ get "/email/status" do
   200
 end
 
-get "/emails" do
+get "/email/emails" do
   matching_emails = $emails.select { |email|
     email["to"] == params["email"] && email["template_id"] == params["template_id"]
   }
