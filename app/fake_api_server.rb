@@ -61,11 +61,23 @@ end
 
 $charges = []
 post "/payments/charge" do
-  if @request_payload["amount_cents"] == 99_99
+  idempotency_key = @request_payload.dig("metadata","idempotency_key")
+  previous_request = if idempotency_key.nil?
+                       nil
+                     else
+                       $charges.detect { |request|
+                         request.dig("metadata","idempotency_key") == idempotency_key &&
+                         request.dig("response","status") == "success"
+                       }
+                     end
+  if !previous_request.nil?
+    [ 201, [], [ previous_request["response"].to_json ] ]
+  elsif @request_payload["amount_cents"] == 99_99
     response = {
-      status: "declined",
-      explanation: "Insufficient funds"
+      "status" => "declined",
+      "explanation" => "Insufficient funds"
     }
+    $charges << @request_payload.merge({ "time" => Time.now, "response" => response })
     [ 200, [], [ response.to_json ] ]
   else
     last_charge = $charges[-1]
@@ -73,16 +85,17 @@ post "/payments/charge" do
                       last_charge["amount_cents"] == @request_payload["amount_cents"] &&
                       (Time.now.to_i - (last_charge["time"].to_i) < 5)
       response = {
-        status: "declined",
-        explanation: "Possible fraud",
+        "status" => "declined",
+        "explanation" => "Possible fraud",
       }
+      $charges << @request_payload.merge({ "time" => Time.now, "response" => response })
       [ 200, [], [ response.to_json ] ]
     else
-      $charges << @request_payload.merge({ "time" => Time.now })
       response = {
-        status: "success",
-        charge_id: "ch_#{SecureRandom.uuid}",
+        "status" => "success",
+        "charge_id" => "ch_#{SecureRandom.uuid}",
       }
+      $charges << @request_payload.merge({ "time" => Time.now, "response" => response })
       [ 201, [], [ response.to_json ] ]
     end
   end
