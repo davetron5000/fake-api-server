@@ -111,6 +111,11 @@ post "/payments/charge" do
   end
 end
 
+delete "/payments/charges" do
+  $charges = []
+  200
+end
+
 get "/payments/ui" do
   response = ui(
     "Payments",
@@ -166,6 +171,11 @@ put "/fulfillment/request" do
   end
 end
 
+delete "/fulfillment/requests" do
+  $fulfillment_requests = []
+  200
+end
+
 get "/fulfillment/ui" do
   response = ui(
     "Mock Fulfillment Service",
@@ -199,6 +209,11 @@ get "/email/emails" do
     email["to"] == params["email"] && email["template_id"] == params["template_id"]
   }
   [ 200, [], [ matching_emails.to_json ] ]
+end
+
+delete "/email/emails" do
+  $emails = []
+  200
 end
 
 get "/email/ui" do

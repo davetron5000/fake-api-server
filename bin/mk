@@ -30,8 +30,27 @@ else
           --data "{\"exception_class\": \"$2\", \"exception_message\": \"$3\" }" \
           http://localhost:8888/error-catcher/notification
       else
-        echo "You must specify an action: email, fulfillment, charge, or error"
-        exit 1
+        if [ "$1" == "CLEAR" ]; then
+          echo "Clearing emails"
+          curl -v --fail -X DELETE \
+            -H "Accept: application/json" -H "Content-type: application/json" -H "Content-length: 0" \
+            http://localhost:8888/email/emails
+          echo "Clearing fulfillment requests"
+          curl -v --fail -X DELETE \
+            -H "Accept: application/json" -H "Content-type: application/json" -H "Content-length: 0" \
+            http://localhost:8888/fulfillment/requests
+          echo "Clearing charges"
+          curl -v --fail -X DELETE \
+            -H "Accept: application/json" -H "Content-type: application/json" -H "Content-length: 0" \
+            http://localhost:8888/payments/charges
+          echo "Clearing errors"
+          curl -v --fail -X DELETE \
+            -H "Accept: application/json" -H "Content-type: application/json" -H "Content-length: 0" \
+            http://localhost:8888/error-catcher/notifications
+        else
+          echo "You must specify an action: email, fulfillment, charge, error, or CLEAR"
+          exit 1
+        fi
       fi
     fi
   fi

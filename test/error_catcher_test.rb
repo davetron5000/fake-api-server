@@ -66,6 +66,7 @@ class ErrorCatcherTest < Minitest::Test
     assert_match /StandardError/,body
 
   end
+
   def test_delete_notifications
     request1 = {
       exception_class: "StandardError",
