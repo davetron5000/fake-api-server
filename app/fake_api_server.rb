@@ -49,9 +49,11 @@ before do
     halt 429
   end
 
-  if request.env["HTTP_X_CRASH"] == "true"
-    logger.info "Request to crash"
-    halt [503,504].sample
+  if request.path != "/email/send"
+    if request.env["HTTP_X_CRASH"] == "true"
+      logger.info "Request to crash"
+      halt [503,504].sample
+    end
   end
 end
 
@@ -223,25 +225,43 @@ get "/email/ui" do
 end
 
 post "/email/send" do
+  status_override = if request.env["HTTP_X_CRASH"] == "true"
+                      logger.info "Request to crash"
+                      503
+                    else
+                      nil
+                    end
   if @request_payload["to"].to_s.strip == ""
     response = {
       "status" => "not-queued",
       "errorMessage" => "to required",
     }
-    [ 422, [], [ response.to_json ] ]
+    if status_override.nil?
+      [ 422, [], [ response.to_json ] ]
+    else
+      halt status_override
+    end
   elsif @request_payload["template_id"].to_s.strip == ""
     response = {
       "status" => "not-queued",
       "errorMessage" => "template_id required",
     }
-    [ 422, [], [ response.to_json ] ]
+    if status_override.nil?
+      [ 422, [], [ response.to_json ] ]
+    else
+      halt status_override
+    end
   else
     response = {
       "status" => "queued",
       "email_id" => SecureRandom.uuid,
     }
     $emails << @request_payload.merge({ "email_id" => response["email_id"] })
-    [ 202, [], [ response.to_json ] ]
+    if status_override.nil?
+      [ 202, [], [ response.to_json ] ]
+    else
+      halt status_override
+    end
   end
 end
 

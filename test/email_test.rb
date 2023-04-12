@@ -12,6 +12,27 @@ class EmailTest < Minitest::Test
     assert_equal 200,last_response.status
   end
 
+  def test_crash_still_sends_email
+    request = {
+      to: "bobbi@example.com",
+      template_id: "2345",
+      template_data: {
+        name: "Chris",
+        order_id: 42,
+      }
+    }.to_json
+    post "/email/send", request, { "HTTP_ACCEPT" => "application/json", "HTTP_X_CRASH" => "true" }
+    assert_equal 503,last_response.status
+
+    get "/email/emails", { email: "bobbi@example.com", template_id: "2345" }, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 200,last_response.status
+    response = JSON.parse(last_response.body)
+    assert_equal 1, response.size
+    email = response[0]
+    assert_equal 42, email["template_data"]["order_id"]
+    refute_nil email["email_id"]
+  end
+
   def test_success
     request = {
       to: "pat@example.com",
