@@ -80,24 +80,12 @@ post "/payments/charge" do
     $charges << @request_payload.merge({ "time" => Time.now, "response" => response })
     [ 200, [], [ response.to_json ] ]
   else
-    last_charge = $charges[-1]
-    if last_charge && last_charge["customer_id"]  == @request_payload["customer_id"]  &&
-                      last_charge["amount_cents"] == @request_payload["amount_cents"] &&
-                      (Time.now.to_i - (last_charge["time"].to_i) < 5)
-      response = {
-        "status" => "declined",
-        "explanation" => "Possible fraud",
-      }
-      $charges << @request_payload.merge({ "time" => Time.now, "response" => response })
-      [ 200, [], [ response.to_json ] ]
-    else
-      response = {
-        "status" => "success",
-        "charge_id" => "ch_#{SecureRandom.uuid}",
-      }
-      $charges << @request_payload.merge({ "time" => Time.now, "response" => response })
-      [ 201, [], [ response.to_json ] ]
-    end
+    response = {
+      "status" => "success",
+      "charge_id" => "ch_#{SecureRandom.uuid}",
+    }
+    $charges << @request_payload.merge({ "time" => Time.now, "response" => response })
+    [ 201, [], [ response.to_json ] ]
   end
 end
 
