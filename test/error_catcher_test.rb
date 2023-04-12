@@ -59,7 +59,7 @@ class ErrorCatcherTest < Minitest::Test
     put "/error-catcher/notification", request2, { "HTTP_ACCEPT" => "application/json" }
     assert_equal 202,last_response.status
 
-    get "/error-catcher/notifications", nil, { "HTTP_ACCEPT" => "text/html" }
+    get "/error-catcher/ui", nil, { "HTTP_ACCEPT" => "text/html" }
     body = last_response.body.to_s
     assert_equal 200,last_response.status
     assert_match /NameError/,body
@@ -98,7 +98,7 @@ class ErrorCatcherTest < Minitest::Test
     delete "/error-catcher/notifications", nil, { "HTTP_ACCEPT" => "application/json" }
     assert_equal 200,last_response.status
 
-    get "/error-catcher/notifications", nil, { "HTTP_ACCEPT" => "text/html" }
+    get "/error-catcher/ui", nil, { "HTTP_ACCEPT" => "text/html" }
     body = last_response.body.to_s
     assert_equal 200,last_response.status
     assert_match /NONE YET/,body

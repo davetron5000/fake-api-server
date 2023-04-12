@@ -55,6 +55,26 @@ before do
   end
 end
 
+get "/" do
+  response = %{
+    <html><head>#{ UI_HEAD }</head><body><main>
+    <ul>
+    <li><a href="/error-catcher/ui">Error Catcher</a></li>
+    <li><a href="/fulfillment/ui">Fulfillment</a></li>
+    <li><a href="/email/ui">Email</a></li>
+    <li><a href="/payments/ui">Payments</a></li>
+    </ul>
+    </main></body></html>
+  }
+  [
+    200,
+    {
+      "Content-Type" => "text/html",
+    },
+    response
+  ]
+end
+
 get "/payments/status" do
   200
 end
@@ -89,6 +109,30 @@ post "/payments/charge" do
   end
 end
 
+get "/payments/ui" do
+  response = ui(
+    "Payments",
+    "💰",
+    "Money",
+    "Charges",
+    $charges,
+    {
+      "customer_id" => { key:"customer_id" },
+      "amount_cents" => { key: "amount_cents" },
+      "status" => { key: [ "response", "status" ] },
+      "charge_id" => { key: [ "response", "charge_id" ] },
+      "metadata" => { key: "metadata" },
+    }
+  )
+  [
+    200,
+    {
+      "Content-Type": "text/html",
+    },
+    response
+  ]
+end
+
 get "/fulfillment/status" do
   [ 200, [], [ { num_requests: $fulfillment_requests.size }.to_json ] ]
 end
@@ -105,19 +149,43 @@ put "/fulfillment/request" do
   else
     if @request_payload["address"].to_s.strip == ""
       response = {
-        status: "rejected",
-        error: "Missing address",
+        "status" => "rejected",
+        "error" => "Missing address",
       }
       [ 422, [], [ response.to_json ] ]
     else
       response = {
-        status: "accepted",
-        request_id: SecureRandom.uuid,
+        "status" => "accepted",
+        "request_id" => SecureRandom.uuid,
       }
-      $fulfillment_requests << @request_payload.merge({ "response" => { "status" => "accepted", "request_id" => response[:request_id] }})
+      $fulfillment_requests << @request_payload.merge({ "response" => { "status" => "accepted", "request_id" => response["request_id"] }})
       [ 202, [], [ response.to_json ] ]
     end
   end
+end
+
+get "/fulfillment/ui" do
+  response = ui(
+    "Mock Fulfillment Service",
+    "📦",
+    "Package",
+    "Fulfillment Requests",
+    $fulfillment_requests,
+    {
+      "customer_id" => { key: "customer_id" },
+      "address" => { key: "address", css_class: "wrap-linebreaks" },
+      "status" => { key: [ "response", "status" ] },
+      "request_id" => { key: [ "response", "request_id" ] },
+      "metadata" => { key: "metadata" },
+    }
+  )
+  [
+    200,
+    {
+      "Content-Type" => "text/html",
+    },
+    response
+  ]
 end
 
 get "/email/status" do
@@ -131,25 +199,48 @@ get "/email/emails" do
   [ 200, [], [ matching_emails.to_json ] ]
 end
 
+get "/email/ui" do
+  response = ui(
+    "Emails",
+    "📧",
+    "Email",
+    "Emails",
+    $emails,
+    {
+      "to" => { key: "to" },
+      "template_id" => { key: "template_id" },
+      "email_id" => { key: "email_id" },
+      "metadata" => { key: "metadata" },
+    }
+  )
+  [
+    200,
+    {
+      "Content-Type" => "text/html",
+    },
+    response
+  ]
+end
+
 post "/email/send" do
   if @request_payload["to"].to_s.strip == ""
     response = {
-      status: "not-queued",
-      errorMessage: "to required",
+      "status" => "not-queued",
+      "errorMessage" => "to required",
     }
     [ 422, [], [ response.to_json ] ]
   elsif @request_payload["template_id"].to_s.strip == ""
     response = {
-      status: "not-queued",
-      errorMessage: "template_id required",
+      "status" => "not-queued",
+      "errorMessage" => "template_id required",
     }
     [ 422, [], [ response.to_json ] ]
   else
     response = {
-      status: "queued",
-      email_id: SecureRandom.uuid,
+      "status" => "queued",
+      "email_id" => SecureRandom.uuid,
     }
-    $emails << @request_payload.merge({ "email_id" => response[:email_id] })
+    $emails << @request_payload.merge({ "email_id" => response["email_id"] })
     [ 202, [], [ response.to_json ] ]
   end
 end
@@ -160,30 +251,101 @@ end
 
 put "/error-catcher/notification" do
   notification = {
-    time: Time.now,
-    exception: @request_payload["exception_class"],
-    message: @request_payload["exception_message"],
+    "time" => Time.now,
+    "exception" => @request_payload["exception_class"],
+    "message" => @request_payload["exception_message"],
   }
-  if notification[:exception].to_s.strip == "" ||
-      notification[:message].to_s.strip == ""
+  if notification["exception"].to_s.strip == "" ||
+      notification["message"].to_s.strip == ""
     response = {
-      error: "exception class or message is missing"
+      "error" => "exception class or message is missing"
     }
     [ 422, [], [ response.to_json ] ]
   else
     response = {
-      notification_id: SecureRandom.uuid,
+      "notification_id" => SecureRandom.uuid,
     }
     $notifications << notification
     [ 202, [], [ response.to_json ] ]
   end
 end
 
-ERROR_CATCHER_HEAD = %{
+delete "/error-catcher/notifications" do
+  $notifications = []
+  200
+end
+
+get "/error-catcher/ui" do
+  response = ui(
+    "Mock Error Catcher",
+    "🐛",
+    "bug",
+    "Notifications",
+    $notifications,
+    {
+      "time" => { key: "time" },
+      "exception" => { key: "exception" },
+      "message" => { key: "message" },
+    }
+  )
+
+  [
+    200,
+    {
+      "Content-Type" => "text/html",
+    },
+    response
+  ]
+end
+
+def ui(name, emoji, emoji_description, subtitle, list, attributes)
+  attributes_html = if list.empty?
+                      "<tr><td colspan='#{attributes.size}'>NONE YET</td></tr>"
+                    else
+                      list.map { |item|
+                        "    <tr>\n" +
+                          attributes.map { |attribute, info|
+                            css_class = info[:css_class] || "nowrap"
+                            key = info[:key]
+                            value = item.dig(*key)
+
+                            "      <td class='#{css_class}'>#{value}</td>\n"
+                          }.join +
+                          "    </tr>\n"
+                      }.join("\n")
+                    end
+  headers = "<tr>" + attributes.map { |attribute, info|
+    "<th>" + attribute.to_s.capitalize + "</th>"
+  }.join("") + "</tr>"
+html = <<DATA
+<html>
+<head>#{ UI_HEAD }</head>
+<body><main>
+<h1>
+  <span role="img" description="#{emoji_description}">#{emoji}</span>
+  #{name}
+</h1>
+<h2>#{subtitle}</h2>
+<table>
+  <thead>
+  #{ headers }
+  </thead>
+  <tbody>
+#{ attributes_html }
+  </tbody>
+</table>
+</main></body></html>
+DATA
+html
+end
+UI_HEAD = %{
   <style>
   * {
     font-family: avenir, helvetica, sans-serif;
     color: #222;
+  }
+  code {
+    font-family: courier, monospace;
   }
 
   main { padding: 1rem; }
@@ -208,12 +370,6 @@ ERROR_CATCHER_HEAD = %{
     border: solid thin #444;
     padding: 0.5rem;
   }
-  table td:nth-child(1) {
-    white-space: nowrap;
-  }
-  table td:nth-child(2) {
-    font-family: courier, monospace;
-  }
   table th {
     text-align: left;
     font-size: 110%;
@@ -223,52 +379,13 @@ ERROR_CATCHER_HEAD = %{
   p {
     line-height: 1.4;
   }
+  .nowrap {
+    white-space: nowrap;
+  }
+  .wrap-linebreaks {
+    white-space: pre-wrap;
+  }
 
   </style>
 }
-get "/" do
-  redirect "/error-catcher/notifications"
-end
-delete "/error-catcher/notifications" do
-  $notifications = []
-  200
-end
-get "/error-catcher/notifications" do
-  notifications_html = if $notifications.empty?
-                         "<tr><td colspan='3'>NONE YET</td></tr>"
-                       else
-                         $notifications.map { |notification|
-    "    <tr>\n" +
-    "      <td>"    + notification[:time].to_s + "</td>\n" +
-    "      <td>"    + notification[:exception] + "</td>\n" +
-    "      <td><p>" + notification[:message]   + "</p></td>\n" +
-    "    </tr>\n"
-  }.join("\n")
-                       end
-  response = %{
-<html>
-<head>#{ ERROR_CATCHER_HEAD }</head>
-<body><main>
-<h1>Mock Error Catcher</h1>
-<h2>Notifications</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Time</th>
-      <th>Exception</th>
-      <th>Message</th>
-    </tr>
-  </thead>
-  <tbody>
-#{ notifications_html }
-  </tbody>
-</table>
-</main></body></html>}
-  [
-    200,
-    {
-      "Content-Type": "text/html",
-    },
-    response
-  ]
-end
+

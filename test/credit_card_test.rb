@@ -12,6 +12,40 @@ class CreditCardTest < Minitest::Test
     assert_equal 200,last_response.status
   end
 
+  def test_ui
+    request1 = {
+      customer_id: 88,
+      payment_method_id: 99,
+      amount_cents: 65_10,
+      metadata: {
+        order_id: 44,
+      }
+    }.to_json
+    post "/payments/charge", request1, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 201,last_response.status
+    response1 = JSON.parse(last_response.body)
+    refute_nil response1["charge_id"]
+
+    request2 = {
+      customer_id: 99,
+      payment_method_id: 59,
+      amount_cents: 123_11,
+      metadata: {
+        order_id: 48,
+      }
+    }.to_json
+    post "/payments/charge", request2, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 201,last_response.status
+    response2 = JSON.parse(last_response.body)
+    refute_nil response2["charge_id"]
+
+    get "/payments/ui", nil, { "HTTP_ACCEPT" => "text/html" }
+    body = last_response.body.to_s
+    assert_equal 200,last_response.status
+    assert_match /#{response1["charge_id"]}/, body
+    assert_match /#{response2["charge_id"]}/, body
+  end
+
   def test_success
     request = {
       customer_id: 88,

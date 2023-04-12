@@ -39,6 +39,38 @@ class FulfillmentRequestTest < Minitest::Test
     assert_equal num_requests + 1, response["num_requests"]
   end
 
+  def test_ui
+    request1 = {
+      customer_id: 45,
+      address: "123 any st",
+      metadata: {
+        order_id: 44,
+      }
+    }.to_json
+    put "/fulfillment/request", request1, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 202,last_response.status
+    response1 = JSON.parse(last_response.body)
+    refute_nil response1["request_id"]
+
+    request2 = {
+      customer_id: 45,
+      address: "123 any st",
+      metadata: {
+        order_id: 44,
+      }
+    }.to_json
+    put "/fulfillment/request", request2, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 202,last_response.status
+    response2 = JSON.parse(last_response.body)
+    refute_nil response2["request_id"]
+
+    get "/fulfillment/ui", nil, { "HTTP_ACCEPT" => "text/html" }
+    body = last_response.body.to_s
+    assert_equal 200,last_response.status
+    assert_match /#{response1["request_id"]}/, body
+    assert_match /#{response2["request_id"]}/, body
+  end
+
   def test_idempotency_key
     get "/fulfillment/status", nil, { "HTTP_ACCEPT" => "application/json" }
     assert_equal 200,last_response.status

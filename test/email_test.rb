@@ -28,6 +28,40 @@ class EmailTest < Minitest::Test
     refute_nil response["email_id"]
   end
 
+  def test_ui
+    request1 = {
+      to: "pat@example.com",
+      template_id: "12345",
+      template_data: {
+        name: "Pat",
+        order_id: 44,
+      }
+    }.to_json
+    post "/email/send", request1, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 202,last_response.status
+    response1 = JSON.parse(last_response.body)
+    refute_nil response1["email_id"]
+
+    request2 = {
+      to: "pat@example.com",
+      template_id: "12345",
+      template_data: {
+        name: "Pat",
+        order_id: 44,
+      }
+    }.to_json
+    post "/email/send", request2, { "HTTP_ACCEPT" => "application/json" }
+    assert_equal 202,last_response.status
+    response2 = JSON.parse(last_response.body)
+    refute_nil response2["email_id"]
+
+    get "/email/ui", nil, { "HTTP_ACCEPT" => "text/html" }
+    body = last_response.body.to_s
+    assert_equal 200,last_response.status
+    assert_match /#{response1["email_id"]}/, body
+    assert_match /#{response2["email_id"]}/, body
+  end
+
   def test_missing_template_id
     request = {
       to: "pat@example.com",

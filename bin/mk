@@ -1,0 +1,39 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" == "email" ]; then
+  curl -v -X POST \
+    -H "Accept: application/json" \
+    -H "Content-type: application/json" \
+    --data "{\"to\": \"$2\", \"template_id\": \"$3\", \"metadata\": { \"order_id\": $4 }}" \
+    http://localhost:8888/email/send
+else
+  if [ "$1" == "fulfillment" ]; then
+    curl -v -X PUT \
+      -H "Accept: application/json" \
+      -H "Content-type: application/json" \
+      --data "{\"customer_id\": \"$2\", \"address\": \"$3\", \"metadata\": { \"order_id\": $4, \"idempotency_key\": \"$5\" }}" \
+      http://localhost:8888/fulfillment/request
+  else
+    if [ "$1" == "charge" ]; then
+      curl -v -X POST \
+        -H "Accept: application/json" \
+        -H "Content-type: application/json" \
+        --data "{\"customer_id\": $2, \"amount_cents\": $3, \"metadata\": { \"order_id\": $4, \"idempotency_key\": \"$5\" }}" \
+        http://localhost:8888/payments/charge
+    else
+      if [ "$1" == "error" ]; then
+        curl -v -X PUT \
+          -H "Accept: application/json" \
+          -H "Content-type: application/json" \
+          --data "{\"exception_class\": \"$2\", \"exception_message\": \"$3\" }" \
+          http://localhost:8888/error-catcher/notification
+      else
+        echo "You must specify an action: email, fulfillment, charge, or error"
+        exit 1
+      fi
+    fi
+  fi
+fi
+
