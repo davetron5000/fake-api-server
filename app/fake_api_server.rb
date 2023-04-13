@@ -104,7 +104,7 @@ post "/payments/charge" do
   else
     response = {
       "status" => "success",
-      "charge_id" => "ch_#{SecureRandom.uuid}",
+      "charge_id" => generate_id("ch"),
     }
     $charges << @request_payload.merge({ "time" => Time.now, "response" => response })
     [ 201, [], [ response.to_json ] ]
@@ -163,7 +163,7 @@ put "/fulfillment/request" do
     else
       response = {
         "status" => "accepted",
-        "request_id" => SecureRandom.uuid,
+        "request_id" => generate_id("fr"),
       }
       $fulfillment_requests << @request_payload.merge({ "response" => { "status" => "accepted", "request_id" => response["request_id"] }})
       [ 202, [], [ response.to_json ] ]
@@ -227,7 +227,7 @@ get "/email/ui" do
       "to" => { key: "to" },
       "template_id" => { key: "template_id" },
       "email_id" => { key: "email_id" },
-      "metadata" => { key: "metadata" },
+      "template_data" => { key: "template_data" },
     }
   )
   [
@@ -269,7 +269,7 @@ post "/email/send" do
   else
     response = {
       "status" => "queued",
-      "email_id" => SecureRandom.uuid,
+      "email_id" => generate_id("em"),
     }
     $emails << @request_payload.merge({ "email_id" => response["email_id"] })
     if status_override.nil?
@@ -298,7 +298,7 @@ put "/error-catcher/notification" do
     [ 422, [], [ response.to_json ] ]
   else
     response = {
-      "notification_id" => SecureRandom.uuid,
+      "notification_id" => generate_id("err"),
     }
     $notifications << notification
     [ 202, [], [ response.to_json ] ]
@@ -374,6 +374,11 @@ html = <<DATA
 DATA
 html
 end
+
+def generate_id(prefix)
+  "#{prefix}_#{SecureRandom.hex(4)}"
+end
+
 UI_HEAD = %{
   <meta charset="utf-8">
   <style>

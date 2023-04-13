@@ -4,13 +4,13 @@ set -e
 
 if [ "$1" == "email" ]; then
   if [ "$2" == "-h" ]; then
-    echo "usage: $0 $1 <to> <template_id> <order_id>"
+    echo "usage: $0 $1 <to> <template_id> <order_id> <subject>"
     exit 1
   fi
   curl -v -X POST \
     -H "Accept: application/json" \
     -H "Content-type: application/json" \
-    --data "{\"to\": \"$2\", \"template_id\": \"$3\", \"metadata\": { \"order_id\": $4 }}" \
+    --data "{\"to\": \"$2\", \"template_id\": \"$3\", \"template_data\": { \"order_id\": $4, \"subject\": \"$5\" }}" \
     http://localhost:8888/email/send
 else
   if [ "$1" == "fulfillment" ]; then
