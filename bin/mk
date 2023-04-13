@@ -3,6 +3,10 @@
 set -e
 
 if [ "$1" == "email" ]; then
+  if [ "$2" == "-h" ]; then
+    echo "usage: $0 $1 <to> <template_id> <order_id>"
+    exit 1
+  fi
   curl -v -X POST \
     -H "Accept: application/json" \
     -H "Content-type: application/json" \
@@ -10,6 +14,10 @@ if [ "$1" == "email" ]; then
     http://localhost:8888/email/send
 else
   if [ "$1" == "fulfillment" ]; then
+    if [ "$2" == "-h" ]; then
+      echo "usage: $0 $1 <customer_id> <address> <order_id> <idempotency_key>"
+      exit 1
+    fi
     curl -v -X PUT \
       -H "Accept: application/json" \
       -H "Content-type: application/json" \
@@ -17,6 +25,10 @@ else
       http://localhost:8888/fulfillment/request
   else
     if [ "$1" == "charge" ]; then
+      if [ "$2" == "-h" ]; then
+        echo "usage: $0 $1 <customer_id> <amount_cents> <order_id> <idempotency_key>"
+        exit 1
+      fi
       curl -v -X POST \
         -H "Accept: application/json" \
         -H "Content-type: application/json" \
@@ -24,6 +36,10 @@ else
         http://localhost:8888/payments/charge
     else
       if [ "$1" == "error" ]; then
+        if [ "$2" == "-h" ]; then
+          echo "usage: $0 $1 <exception_class> <exception_message>"
+          exit 1
+        fi
         curl -v -X PUT \
           -H "Accept: application/json" \
           -H "Content-type: application/json" \

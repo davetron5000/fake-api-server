@@ -219,8 +219,8 @@ end
 get "/email/ui" do
   response = ui(
     "Emails",
-    "📧",
-    "Email",
+    "📪",
+    "Mailbox",
     "Emails",
     $emails,
     {
@@ -350,7 +350,8 @@ def ui(name, emoji, emoji_description, subtitle, list, attributes)
                       }.join("\n")
                     end
   headers = "<tr>" + attributes.map { |attribute, info|
-    "<th>" + attribute.to_s.capitalize + "</th>"
+    title = attribute.to_s.split(/\_/).map(&:capitalize).join(" ")
+    "<th>" + title + "</th>"
   }.join("") + "</tr>"
 html = <<DATA
 <html>
@@ -374,6 +375,7 @@ DATA
 html
 end
 UI_HEAD = %{
+  <meta charset="utf-8">
   <style>
   * {
     font-family: avenir, helvetica, sans-serif;
@@ -410,6 +412,7 @@ UI_HEAD = %{
     font-size: 110%;
     font-weight: 500;
     background-color: #dfdfdf;
+    white-space: nowrap;
   }
   p {
     line-height: 1.4;
