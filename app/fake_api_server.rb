@@ -1,3 +1,9 @@
+# I will just say right here that this is not a great
+# example of production-ready Sinatra app.  I didn't want
+# to spend a lot of time carefully factoring it, so it's
+# all in one file, using global variables.  But there
+# are tests, so it should at least work well enough for
+# the book.
 require "sinatra"
 require "json"
 
