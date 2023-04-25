@@ -4,35 +4,62 @@ This is a real server that will allow our app to make real HTTP calls, but the s
 real.  The server does, however, allow us to simulate various problems that may happen when integrating real third
 party code, such as slow responses, interrupted responses, and other issues.
 
-## Forcing Bad Behavior
+## Setup
 
-The following headers, if set, will make the server behave badly:
+Generally, you should not have to run this from this repo unless you are doing development on the server itself. With that out of the
+way:
+
+1. [Ensure you have Docker installed](https://docs.docker.com/get-docker/)
+1. `dx/setup` (only required one time)
+1. `dx/build`
+1. `dx/start`
+1. `dx/exec bash`
+1. You are now "logged in" to the Docker container.
+
+### Dev Workflow
+
+After you "log in" to the container, you can edit code on your computer and it'll be availbale in the container. The container has Ruby
+installed, as well as whatever else is needed to run and test the app.
+
+* `bin/test` will run the tests
+* `bin/ci` will run tets and then run `bundle audit`
+* `bin/run` will run the app. *Note*: there is no auto-reload, so if you make changes, you have to restart.  The app will be available
+at `http://localhost:8888`.  There are minimal UIs for each fake service.
+* `bin/mk` **is to be run on your computer** and it will hit the API to do stuff. `bin/mk -h` will give better help
+
+## General Docs
+
+This app containers four fake services: payments, email, order fulfillment, and an error-catcher (like Bugsnag).  Each stores requests
+in memory and shows that in a basic UI when you run the app.
+
+The purpose of these existing at all is to have a real networked service the sample app can connect to *and* provide a way to simulate
+bad behavior of the services. This can be used to simulate failure modes you will encounter.
+
+To simulate bad behavior, use these headers when making requests:
 
 * `X-Be-Slow` - If set to "true", will sleep a random amount of time. If set to a number, will sleep that many
 seconds.
 * `X-Throttle` - If set to "true" will return a 429.
 * `X-Crash` - If set to "true" will return a 503 or 504.
 
-Slow and Throttle or Slow and Crash can be combined.
+Slow can be combined with either Crash or Throttle.
 
-## Setup and Running Locally
+## What each file here is
 
-### One Time Setup
+In this directory:
 
-1. Clone this repo
-1. Install Docker Desktop
-1. `dx/setup` then answer whatever questions it asks
-1. `dx/start`
+* `.gitignore` - File of files to ignore in Git
+* `Dockerfile.dx` - The `Dockerfile` used to build an image you can use to run a container to do the development for the app.
+* `Dockerfile` - The `Dockerfile` used to build an image pushed to DockerHub. This is the image used by the book.
+* `Gemfile` and `Gemfile.lock` - manages Ruby gems needed for the app.
+* `README.md` - This file
+* `Rakefile` - holds the test task because I could not figure out a better way to run it without Rake.
+* `app/` - The app itself, currently just one big file. Take that, Single Responsibilty Principle!
+* `bin/` - Directory for scripts relevant to running, testing, or developingn the app itself.
+* `docker-compose.dx.yml` - A Docker Compose file that runs the app.
+* `dx/` - Directory for all the shell scripts and files needed to run the dev environment.
+* `test/` - Tests for the app.
 
-### Running & Developing
-
-1. Do the setup above, including `dx/start`
-1. Set up the app's dependencies
-   1. In a new terminal window `dx/exec bash` - You are logged into the running container.
-   1. `bin/setup`
-1. Run tests with `bin/test`
-1. Run tests and security checks with `bin/ci`
-1. Run server locally with `bin/run`
 
 ## Integration with Sidekiq Book Stuff
 
