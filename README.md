@@ -13,23 +13,23 @@ way:
 1. `dx/setup` (only required one time)
 1. `dx/build`
 1. `dx/start`
-1. `dx/exec bash`
+1. Then, in another terminal: `dx/exec bash`
 1. You are now "logged in" to the Docker container.
 
 ### Dev Workflow
 
-After you "log in" to the container, you can edit code on your computer and it'll be availbale in the container. The container has Ruby
+After you "log in" to the container, you can edit code on your computer and it'll be available in the container. The container has Ruby
 installed, as well as whatever else is needed to run and test the app.
 
 * `bin/test` will run the tests
-* `bin/ci` will run tets and then run `bundle audit`
+* `bin/ci` will run tests and then run `bundle audit`
 * `bin/run` will run the app. *Note*: there is no auto-reload, so if you make changes, you have to restart.  The app will be available
 at `http://localhost:8888`.  There are minimal UIs for each fake service.
 * `bin/mk` **is to be run on your computer** and it will hit the API to do stuff. `bin/mk -h` will give better help
 
 ## General Docs
 
-This app containers four fake services: payments, email, order fulfillment, and an error-catcher (like Bugsnag).  Each stores requests
+This app contains four fake services: payments, email, order fulfillment, and an error-catcher (like Bugsnag).  Each stores requests
 in memory and shows that in a basic UI when you run the app.
 
 The purpose of these existing at all is to have a real networked service the sample app can connect to *and* provide a way to simulate
@@ -54,8 +54,8 @@ In this directory:
 * `Gemfile` and `Gemfile.lock` - manages Ruby gems needed for the app.
 * `README.md` - This file
 * `Rakefile` - holds the test task because I could not figure out a better way to run it without Rake.
-* `app/` - The app itself, currently just one big file. Take that, Single Responsibilty Principle!
-* `bin/` - Directory for scripts relevant to running, testing, or developingn the app itself.
+* `app/` - The app itself, currently just one big file. Take that, Single Responsibility Principle!
+* `bin/` - Directory for scripts relevant to running, testing, or developing the app itself.
 * `docker-compose.dx.yml` - A Docker Compose file that runs the app.
 * `dx/` - Directory for all the shell scripts and files needed to run the dev environment.
 * `test/` - Tests for the app.
