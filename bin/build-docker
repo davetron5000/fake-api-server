@@ -10,4 +10,7 @@ if [ -e /.dockerenv ]; then
   echo "[ $0 ]: You should not run this inside a Docker container"
   exit 1
 fi
+BOOK_REPO_CODE=$(realpath ${SCRIPT_DIR}/../../dcsidekiq/Book/code)
+echo "[ $0 ] 🔄 Re-syncing to book repo '${BOOK_REPO_CODE}'"
+rsync -l --exclude='/.git' --delete -r . ${BOOK_REPO_CODE}/fake-api-server
 docker build -t davetron5000/fake-api-server:${VERSION} ./
