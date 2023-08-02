@@ -23,8 +23,8 @@ docker buildx use multi-arch
 
 log "🐋" "Building and pushing images to Docker Hub"
 docker buildx build \
-  --file Dockerfile.dx \
-  --tag "${IMAGE}" \
+  --file Dockerfile \
+  --tag "davetron5000/fake-api-server:1.2.0" \
   --platform=linux/arm64,linux/amd64 \
   --push \
   ./
