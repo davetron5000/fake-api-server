@@ -11,7 +11,7 @@ GEM
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
     nio4r (2.5.9)
-    puma (6.2.2)
+    puma (6.4.0)
       nio4r (~> 2.0)
     rack (2.2.7)
     rack-protection (3.0.6)
@@ -44,4 +44,4 @@ RUBY VERSION
    ruby 3.2.2p53
 
 BUNDLED WITH
-   2.4.10
+   2.4.19
