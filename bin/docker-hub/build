@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -e
+
+DOCKER_HUB_SCRIPT_DIR=$( cd -- "$( dirname -- "${0}" )" > /dev/null 2>&1 && pwd )
+ROOT_DIR=$( cd -- ${DOCKER_HUB_SCRIPT_DIR}/../.. > /dev/null 2>&1 && pwd )
+DX_DIR="${ROOT_DIR}/dx"
+SCRIPT_DIR="${DX_DIR}"
+
+. "${DX_DIR}/dx.sh.lib"
+. "${DOCKER_HUB_SCRIPT_DIR}/vars"
+
+require_command "docker"
+
+usage_on_help "Builds the Docker image for Docker Hub based on the Dockerfile" "" "" "" "${@}"
+
+IMAGE="${REPO}"/"${NAME}":"${VERSION}"
+
+docker build \
+  --file "${ROOT_DIR}"/Dockerfile \
+  --tag "${IMAGE}" \
+  ./
+
+log "🌈" "Your Docker image has been built tagged '${IMAGE}'"

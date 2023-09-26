@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+DOCKER_HUB_SCRIPT_DIR=$( cd -- "$( dirname -- "${0}" )" > /dev/null 2>&1 && pwd )
+ROOT_DIR=$( cd -- ${DOCKER_HUB_SCRIPT_DIR}/../.. > /dev/null 2>&1 && pwd )
+DX_DIR="${ROOT_DIR}/dx"
+SCRIPT_DIR="${DX_DIR}"
+
+. "${DX_DIR}/dx.sh.lib"
+. "${DOCKER_HUB_SCRIPT_DIR}/vars"
+
+require_command "docker"
+
+usage_on_help "Pushes the Docker image to Docker Hub" "" "" "" "${@}"
+
+IMAGE="${REPO}"/"${NAME}":"${VERSION}"
+
+docker push "${IMAGE}"
+
+log "🌈" "Your Docker image has been pushed"

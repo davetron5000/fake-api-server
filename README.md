@@ -4,6 +4,11 @@ This is a real server that will allow our app to make real HTTP calls, but the s
 real.  The server does, however, allow us to simulate various problems that may happen when integrating real third
 party code, such as slow responses, interrupted responses, and other issues.
 
+## Docker Image
+
+The [Sidekiq Book](https://sidekiqrails.com) uses this app in a Docker Image. You can find it [on Docker
+Hub](https://hub.docker.com/r/davetron5000/fake-api-server)
+
 ## Setup
 
 Generally, you should not have to run this from this repo unless you are doing development on the server itself. With that out of the
@@ -61,10 +66,13 @@ In this directory:
 * `test/` - Tests for the app.
 
 
-## Integration with Sidekiq Book Stuff
+## Pushing to DockerHub
 
 1. Be sure that `Dockerfile` and `Dockerfile.dx` are consistent
-1. Edit `bin/version`
-1. `bin/docker-build`
-1. `bin/push-dockerhub`
-1. Edit the sidekiq book's `automation/docker-compose.yml` to use the new version
+1. Make sure all tests are passing via `bin/ci` and there are no warnings or other nonsense
+1. Edit `bin/docker-hub/vars` to bump the version
+1. `bin/docker-hub/build`
+1. `bin/docker-hub/push`
+1. Edit the sidekiq book's `automation/dev-environment/docker-compose.yml` to use the new version
+1. Tag the repo as the same version in step 3 and push that tag
+
